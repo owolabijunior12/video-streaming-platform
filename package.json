@@ -1,0 +1,13 @@
+{
+  "name": "video-streaming-platform",
+  "version": "1.0.0",
+  "description": "video-streaming-platform",
+  "main": "app.js",
+  "scripts": {
+    "dev":"nodemon app.js",
+    
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "iboytech",
+  "license": "ISC"
+}
