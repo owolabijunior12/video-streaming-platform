@@ -1,24 +1,78 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            clifford: '#da373d',
-          }
-        }
-      }
-    }
-  </script>
+  <title>Video Streaming Platform</title>
 </head>
 <body>
-  <h1 class="text-3xl font-bold underline **text-clifford**">
-    Hello world!
-  </h1>
+  <h1>Welcome to the Video Streaming Platform</h1>
+
+  <!-- Video Player -->
+  <video id="videoPlayer"autoplay >
+    Your browser does not support the video tag.
+  </video>
+
+  <!-- Real-time Chat -->
+  <ul id="messages"></ul>
+  <form id="form" action="">
+    <input id="m" autocomplete="off" /><button>Send</button>
+  </form>
+
+  <!-- User Actions -->
+  <div>
+    <label for="videoUrl">Video URL:</label>
+    <input type="text" id="videoUrl" />
+    <button onclick="startVideoStream()">Start Stream</button>
+    <button onclick="joinVideoStream()">Join Stream</button>
+  </div>
+
+  <!-- Include Socket.io client library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.2.0/socket.io.js"></script>
+
+  <script>
+    const socket = io();
+
+    socket.on('chat message', (msg) => {
+      const messages = document.getElementById('messages');
+      const li = document.createElement('li');
+      li.textContent = msg;
+      messages.appendChild(li);
+    });
+
+    socket.on('video streaming', (data) => {
+      console.log(`Video stream with ID ${data.streamId} is being streamed`);
+      document.getElementById('videoPlayer').src = `/stream/${data.streamId}`;
+    });
+
+    document.getElementById('form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const input = document.getElementById('m');
+      const message = input.value;
+      socket.emit('chat message', message);
+      input.value = '';
+    });
+
+    function startVideoStream() {
+      navigator.mediaDevices.getUserMedia({ video: true })
+        .then((stream) => {
+          const videoPlayer = document.getElementById('videoPlayer');
+          videoPlayer.srcObject = stream;
+          socket.emit('start video stream');
+        })
+        .catch((error) => {
+          console.error('Error accessing camera:', error);
+        });
+    }
+
+    function joinVideoStream() {
+      const streamId = prompt('Enter the stream ID to join:');
+      if (streamId) {
+        socket.emit('join video stream', { streamId });
+      }
+    }
+
+    window.addEventListener('load', startVideoStream);
+  </script>
 </body>
 </html>
